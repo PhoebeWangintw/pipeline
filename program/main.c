@@ -1,14 +1,37 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-
-int main(int argc, char *argv[]) {
-	return 0;
-}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "in_fetch.h"
 
 /* initialize register */
-int register[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6}  /* $0 ~ $9 */
-int dataRegister[] = {5, 9, 4, 8 , 7}  /* 0x00 ~ 0x10 */
+int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
+const char dataMemAddr[][4] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
+int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
+
+/* control signal */
+int r_control[] = {1, 1, 0, 0, 0, 0, 0, 1, 0};
+int lw_control[] = {0, 0, 0, 1, 0, 1, 0, 1, 1};
+int sw_control[] = {0, 0, 0, 1, 0, 0, 1, 0, 0};
+int beq_control[] = {0, 0, 1, 0, 1, 0, 0, 0, 0};
+
+/* PC */
+int PC;
+int main(int argc, char *argv[]) {
+	char *buffer;
+    size_t bufsize = 40;
+    size_t characters;
+	buffer = (char *)malloc(bufsize * sizeof(char));
+    if (buffer == NULL) {
+        perror("Unable to allocate buffer");
+        exit(1);
+	}
+	/* read instructions */
+	PC = 0;  // init PC
+	while (getline(&buffer,&bufsize,stdin) != EOF) {
+		instruction_fetch(buffer);
+	}
+	return 0;
+}
 
 /* lw, sw, add, addi, sub, or, slt */
 
@@ -33,7 +56,3 @@ int dataRegister[] = {5, 9, 4, 8 , 7}  /* 0x00 ~ 0x10 */
 /* lw: 100011 */
 /* sw: 101011 */
 /* addi: 001000 */
-
-void readInstruction() {
-	
-}
