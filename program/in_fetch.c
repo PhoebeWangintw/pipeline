@@ -1,18 +1,21 @@
 /* instruction fetch */
 /* 1. add PC */
 #include <stdio.h>
+#include <string.h>
 extern int PC;
-void addPC(int PC) {
+extern char bufferArr[5][32];
+
+void addPC() {
     PC += 4;
 }
 
-void in_fetch_print(char *instr) {
+void in_fetch_print() {
     printf("IF/ID: \n");
     printf("PC\t\t%d\n", PC);
-    printf("Instruction\t%s", instr);
+    printf("Instruction\t%s\n\n", bufferArr[0]);
 }
 
 void instruction_fetch(char *instr) {
-    addPC(PC);
-    in_fetch_print(instr);
+    addPC();
+    strncpy(bufferArr[0], instr, 32);
 }

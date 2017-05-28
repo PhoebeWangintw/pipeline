@@ -2,20 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include "in_fetch.h"
+#include "in_decode.h"
 
-/* initialize register */
+/* initialize register & its value */
 int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
-const char dataMemAddr[][4] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
+char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
+int rs_r, rt_r, rd_r, addr_v;
 
 /* control signal */
-int r_control[] = {1, 1, 0, 0, 0, 0, 0, 1, 0};
-int lw_control[] = {0, 0, 0, 1, 0, 1, 0, 1, 1};
-int sw_control[] = {0, 0, 0, 1, 0, 0, 1, 0, 0};
-int beq_control[] = {0, 0, 1, 0, 1, 0, 0, 0, 0};
+char *r_control = "110000010";
+char *lw_control = "000101011";
+char *sw_control = "000100100";
+char *addi_control = "000000000";
+char *beq_control = "001010000";
+char control_signal[9] = "000000000";
 
 /* PC */
-int PC;
+int PC, CC;
+char bufferArr[5][32] = {"00000000000000000000000000000000"};
+
+void printHeader();
 int main(int argc, char *argv[]) {
 	char *buffer;
     size_t bufsize = 40;
@@ -26,33 +33,27 @@ int main(int argc, char *argv[]) {
         exit(1);
 	}
 	/* read instructions */
-	PC = 0;  // init PC
+	PC = 0, CC = 0;  // init PC, CC
 	while (getline(&buffer,&bufsize,stdin) != EOF) {
 		instruction_fetch(buffer);
+		printHeader(buffer);
+		instruction_decode(bufferArr[0]);
 	}
 	return 0;
 }
 
 /* lw, sw, add, addi, sub, or, slt */
-
-
-
-/* R-type */
-/* add, sub, or, slt */
-/* op: 6(0), rs: 5, rt: 5, rd: 5, shamt: 5, funct: 6(ALU instruction) */
-/* R-type rd, rs, rt */
-/* funct: */
-/* add: 100000 */
-/* sub: 100010 */
-/* or: 100101 */
-/* slt: 101010 */
-
-
-/* I-type */
-/* lw, sw, addi */
-/* op: 6, rs: 5, rt: 5, address: 16 */
-/* I-type rt, addr(rs) */
-/* opcode: */
-/* lw: 100011 */
-/* sw: 101011 */
-/* addi: 001000 */
+void printHeader(char *instr) {
+	int i;
+	CC += 1;
+	printf("CC %d:\n", CC);
+	printf("\nRegisters:\n");
+	for (i = 0;i < 10; ++i) 
+		printf("$%d: %d\n", i, registers[i]);
+	printf("\nData memory:\n");
+	for (i = 0;i < 5; ++i) 
+		printf("%s: %d\n", dataAddr[i], dataMem[i]);
+	printf("\n");
+	in_fetch_print(instr);
+	in_decode_print();
+}
