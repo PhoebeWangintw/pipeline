@@ -5,7 +5,7 @@
 struct IF_ID {
 	int PC;
 	char *instr;
-} if_id;
+} *if_id;
 
 /* ID/EX */
 struct ID_EX {
@@ -15,25 +15,22 @@ struct ID_EX {
 	int addr;
 	int funct;
 	char *control_signal;
-} id_ex;
+} *id_ex;
 
 /* EX/MEM */
 struct EX_MEM {
 	int rs;
-	int rt;
-	int rd;
+	int rt_rd;
 	int ALUOut;
 	int WriteData;
 	char *control_signal;
-} ex_mem;
+} *ex_mem;
 
 /* MEM/WB */
 struct MEM_WB {
-	int rs;
-	int rt;
-	int rd;
+	int rt_rd;
 	int ALUOut;
 	char *control_signal;
-} mem_wb;
+} *mem_wb;
 
 #endif

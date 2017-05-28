@@ -9,13 +9,15 @@
 #include "struct.h"
 
 extern int registers[];
-extern char *r_control;
-extern char *lw_control;
-extern char *sw_control;
-extern char *addi_control;
-extern char *andi_control;
-extern char *beq_control;
-extern char *bnq_control;
+/* control signal */
+// TODO: check the control signal of andi_control.
+char *r_control = "110000010";
+char *lw_control = "000101011";
+char *sw_control = "000100100";
+char *addi_control = "000100010";
+char *andi_control = "";
+char *beq_control = "001010000";
+char *bnq_control = "001010000";
 
 /* R-type */
 /* add, sub, or, slt */
@@ -67,7 +69,17 @@ int bin2dec(char *bin) {
 
 struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     struct ID_EX *id_ex = (struct ID_EX*)malloc(sizeof(struct ID_EX));
-
+    id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
+    if (strcmp(if_id->instr, "00000000000000000000000000000000") == 0) {
+        id_ex->rs = 0;
+        id_ex->rt = 0;
+        id_ex->rd = 0;
+        id_ex->addr = 0;
+        id_ex->funct = 0;
+        strcpy(id_ex->control_signal, "000000000");
+        id_ex->control_signal[9] = '\0';
+        return id_ex;
+    }
     // op code
     strncpy(op, if_id->instr, 6);
     strncpy(rs, if_id->instr + 6, 5);
@@ -81,8 +93,7 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     id_ex->rd = bin2dec(rd);
     id_ex->addr = bin2dec(addr);
     id_ex->funct = bin2dec(funct);
-
-    id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
+    
     if (strcmp(op, r_op) == 0) {
         // r-type
         strcpy(id_ex->control_signal, r_control);
@@ -99,8 +110,6 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     } else if (strcmp(op, bnq_op) == 0) {
         strcpy(id_ex->control_signal, bnq_control);
     }
-
-    in_decode_print(id_ex);
 
     return id_ex;
 }

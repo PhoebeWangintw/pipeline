@@ -42,7 +42,6 @@ struct IF_ID* instruction_fetch() {
     if_id->instr[32] = '\0';
     addPC();
     if_id->PC = PC;
-    in_fetch_print(if_id);
 
     return if_id;
 }

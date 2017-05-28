@@ -12,7 +12,7 @@ void exe_print(struct EX_MEM* ex_mem) {
     printf("\nEX/MEM :\n");
     printf("ALUOut\t\t%d\n", ex_mem->ALUOut);
     printf("WriteData\t%d\n", ex_mem->WriteData);
-    printf("Rt/Rd\t\n");
+    printf("Rt/Rd\t\t%d\n", ex_mem->rt_rd);
     printf("Control signals\t%s\n", ex_mem->control_signal);
 }
 
@@ -52,23 +52,25 @@ struct EX_MEM* execution(struct ID_EX* id_ex) {
                 else ex_mem->ALUOut = 0;
                 break;
             default:
-                printf("cannot recognize function value!!!!!!!!!!!!!!!!!!!");
+                printf("id_Ex: %d\n", id_ex->funct);
+                printf("============cannot recognize function value=============");
                 break;
         }
-    } else if (strcmp(ALUOp, "00") == 0) {
-        /* lw or sw -> rs + addr*/
-        ex_mem->ALUOut = id_ex->rs + id_ex->addr;
-    } else if (strcmp(ALUOp, "11")) {
-        /* andi */
-    } else if (strcmp(ALUOp, "01") == 0) {
-        /* branch */
-        // TODO: check if is rt - rs
-        ex_mem->ALUOut = id_ex->rt - id_ex->rs;
+        ex_mem->rt_rd = id_ex->rd;
+    } else {
+        if (strcmp(ALUOp, "00") == 0) {
+            /* lw or sw -> rs + addr*/
+            ex_mem->ALUOut = id_ex->rs + id_ex->addr;
+        } else if (strcmp(ALUOp, "11")) {
+            /* andi */
+        } else if (strcmp(ALUOp, "01") == 0) {
+            /* branch */
+            // TODO: check if is rt - rs
+            ex_mem->ALUOut = id_ex->rt - id_ex->rs;
+        }
+        ex_mem->rt_rd = id_ex->rt;
     }
     ex_mem->WriteData = id_ex->rt;
-    ex_mem->rs = id_ex->rs;
-    ex_mem->rt = id_ex->rt;
-    ex_mem->rd = id_ex->rd;
-    exe_print(ex_mem);
+    
     return ex_mem;
 }
