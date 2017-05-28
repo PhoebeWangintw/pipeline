@@ -1,6 +1,6 @@
 all:
 	gcc -o exec *.c
 test:
-	./exec < ../input/SampleInput.txt
+	./exec < ../input/General.txt
 clear:
 		rm *.o exec

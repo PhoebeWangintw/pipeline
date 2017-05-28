@@ -14,7 +14,7 @@ void addPC() {
 }
 
 void in_fetch_print(struct IF_ID *if_id) {
-    printf("IF/ID: \n");
+    printf("IF/ID :\n");
     printf("PC\t\t%d\n", if_id->PC);
     printf("Instruction\t%s\n\n", if_id->instr);
 }

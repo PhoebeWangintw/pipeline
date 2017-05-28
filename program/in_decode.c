@@ -15,7 +15,7 @@ char *r_control = "110000010";
 char *lw_control = "000101011";
 char *sw_control = "000100100";
 char *addi_control = "000100010";
-char *andi_control = "";
+char *andi_control = "011100010";
 char *beq_control = "001010000";
 char *bnq_control = "001010000";
 
@@ -31,12 +31,12 @@ char *bnq_control = "001010000";
 
 /*  */
 
-char op[6];
-char rs[5];
-char rt[5];
-char rd[5];
-char funct[6];
-char addr[16];
+char op[7];
+char rs[6];
+char rt[6];
+char rd[6];
+char funct[7];
+char addr[17];
 char *r_op = "000000";
 char *lw_op = "100011";
 char *sw_op = "101011";
@@ -74,6 +74,8 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
         id_ex->rs = 0;
         id_ex->rt = 0;
         id_ex->rd = 0;
+        id_ex->rs_v = 0;
+        id_ex->rt_v = 0;
         id_ex->addr = 0;
         id_ex->funct = 0;
         strcpy(id_ex->control_signal, "000000000");
@@ -85,14 +87,22 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     strncpy(rs, if_id->instr + 6, 5);
     strncpy(rt, if_id->instr + 11, 5);
     strncpy(rd, if_id->instr + 16, 5);
-    strncpy(funct, if_id->instr + 26, 6);
     strncpy(addr, if_id->instr + 16, 16);
+    strncpy(funct, if_id->instr + 26, 6);
+    op[6] = '\0';
+    rs[5] = '\0';
+    rt[5] = '\0';
+    rd[5] = '\0';
+    addr[16] = '\0';
+    funct[6] = '\0';
     // TODO: check if rd == $0
     id_ex->rs = bin2dec(rs);
     id_ex->rt = bin2dec(rt);
     id_ex->rd = bin2dec(rd);
     id_ex->addr = bin2dec(addr);
     id_ex->funct = bin2dec(funct);
+    id_ex->rs_v = registers[id_ex->rs];
+    id_ex->rt_v = registers[id_ex->rt];
     
     if (strcmp(op, r_op) == 0) {
         // r-type

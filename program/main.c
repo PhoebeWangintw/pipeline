@@ -73,10 +73,12 @@ void init() {
 	id_ex->rs = 0;
 	id_ex->rt = 0;
 	id_ex->rd = 0;
+	id_ex->rs_v = 0;
+	id_ex->rt_v = 0;
 	id_ex->addr = 0;
 	id_ex->funct = 0;
 	id_ex->control_signal = (char *)malloc(sizeof(char)*10);
-	strcpy(id_ex->control_signal, "00000000");
+	strcpy(id_ex->control_signal, "000000000");
 	ex_mem = (struct EX_MEM*)malloc(sizeof(struct EX_MEM));
 	ex_mem->rs = 0;
 	ex_mem->rt_rd = 0;
@@ -87,6 +89,7 @@ void init() {
 	ex_mem->control_signal[5] = '\0';
 	mem_wb = (struct MEM_WB*)malloc(sizeof(struct MEM_WB));
 	mem_wb->rt_rd = 0;
+	mem_wb->ReadData = 0;
 	mem_wb->ALUOut = 0;
 	mem_wb->control_signal = (char *)malloc(sizeof(char)*3);
 	strcpy(mem_wb->control_signal, "00");

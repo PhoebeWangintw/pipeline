@@ -12,6 +12,8 @@ struct ID_EX {
 	int rs;
 	int rt;
 	int rd;
+	int rs_v;
+	int rt_v;
 	int addr;
 	int funct;
 	char *control_signal;
@@ -30,6 +32,7 @@ struct EX_MEM {
 struct MEM_WB {
 	int rt_rd;
 	int ALUOut;
+	int ReadData;
 	char *control_signal;
 } *mem_wb;
 
