@@ -3,24 +3,52 @@
 #include <string.h>
 #include "in_fetch.h"
 #include "in_decode.h"
+#include "exe.h"
+#include "mem.h"
 
 /* initialize register & its value */
 int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
 char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
-int rs_r, rt_r, rd_r, addr_v;
+int rs_v, rt_v, rd_v, addr_v, funct_v;
 
 /* control signal */
+// TODO: check the control signal of andi_control.
 char *r_control = "110000010";
 char *lw_control = "000101011";
 char *sw_control = "000100100";
-char *addi_control = "000000000";
+char *addi_control = "000100010";
+char *andi_control = "";
 char *beq_control = "001010000";
-char control_signal[9] = "000000000";
+char *bnq_control = "001010000";
+char *control_signal_e = "000000000";
+char *control_signal_m = "00000";
+char *control_signal_w = "00";
 
 /* PC */
 int PC, CC;
-char bufferArr[5][32] = {"00000000000000000000000000000000"};
+
+/* buffer: IF/ID, ID/EX, EX/MEM, MEM/WB */
+char bufferArr[4][32] = {"00000000000000000000000000000000"};
+char *nop_instruction = {"00000000000000000000000000000000"};
+
+// TODO: change global variable to local variable using struct.
+/* IF/ID */
+struct IF_ID {
+
+}
+/* ID/EX */
+struct ID_IE {
+
+}
+/* EX/MEM */
+struct EX_MEM {
+
+}
+/* MEM/WB */
+struct MEM_WB {
+
+}
 
 void printHeader();
 int main(int argc, char *argv[]) {
@@ -38,6 +66,12 @@ int main(int argc, char *argv[]) {
 		instruction_fetch(buffer);
 		printHeader(buffer);
 		instruction_decode(bufferArr[0]);
+		if (getline(&buffer,&bufsize,stdin) != EOF) {
+			printHeader(buffer);
+		} else {
+			printHeader(nop_instruction);
+		}
+		execution();
 	}
 	return 0;
 }
@@ -56,4 +90,6 @@ void printHeader(char *instr) {
 	printf("\n");
 	in_fetch_print(instr);
 	in_decode_print();
+	exe_print();
+	mem_print();
 }

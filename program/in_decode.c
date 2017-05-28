@@ -11,30 +11,24 @@ extern char *r_control;
 extern char *lw_control;
 extern char *sw_control;
 extern char *addi_control;
+extern char *andi_control;
 extern char *beq_control;
-extern char control_signal[9];
+extern char *bnq_control;
+extern char *control_signal_e;
 
 /* R-type */
 /* add, sub, or, slt */
 /* op: 6(0), rs: 5, rt: 5, rd: 5, shamt: 5, funct: 6(ALU instruction) */
 /* R-type rd, rs, rt */
-/* funct: */
-/* add: 100000 */
-/* sub: 100010 */
-/* or: 100101 */
-/* slt: 101010 */
-
 
 /* I-type */
 /* lw, sw, addi */
 /* op: 6, rs: 5, rt: 5, address: 16 */
 /* I-type rt, addr(rs) */
-/* opcode: */
-/* lw: 100011 */
-/* sw: 101011 */
-/* addi: 001000 */
 
-extern int rs_r, rt_r, rd_r, addr_v;
+/*  */
+
+extern int rs_v, rt_v, rd_v, addr_v, funct_v;
 char op[6];
 char rs[5];
 char rt[5];
@@ -44,17 +38,20 @@ char addr[16];
 char *r_op = "000000";
 char *lw_op = "100011";
 char *sw_op = "101011";
+char *beq_op = "000100";
+char *bnq_op = "000101";
 char *addi_op = "001000";
+char *andi_op = "001100";
 
 void in_decode_print() {
     printf("ID/EX :\n");
-    printf("ReadData1\t%d\n", registers[rs_r]);
-    printf("ReadData2\t%d\n", registers[rt_r]);
+    printf("ReadData1\t%d\n", registers[rs_v]);
+    printf("ReadData2\t%d\n", registers[rt_v]);
     printf("sign_ext\t%d\n", addr_v);
-    printf("Rs\t\t%d\n", rs_r);
-    printf("Rt\t\t%d\n", rt_r);
-    printf("Rd\t\t%d\n", rt_r);
-    printf("Control signals\t%s\n", control_signal);
+    printf("Rs\t\t%d\n", rs_v);
+    printf("Rt\t\t%d\n", rt_v);
+    printf("Rd\t\t%d\n", rt_v);
+    printf("Control signals\t%s\n", control_signal_e);
 }
 
 int bin2dec(char *bin) {
@@ -77,19 +74,27 @@ void instruction_decode(char *instr) {
     strncpy(funct, instr + 26, 6);
     strncpy(addr, instr + 16, 16);
     // TODO: check if rd == $0
-    rs_r = bin2dec(rs);
-    rt_r = bin2dec(rt);
-    rd_r = bin2dec(rd);
+    rs_v = bin2dec(rs);
+    rt_v = bin2dec(rt);
+    rd_v = bin2dec(rd);
     addr_v = bin2dec(addr);
+    funct_v = bin2dec(funct);
     
+    control_signal_e = (char *)malloc(sizeof(char)*strlen(r_control));
     if (strcmp(op, r_op) == 0) {
         // r-type
-        strncpy(control_signal, r_control, 9);
+        strcpy(control_signal_e, r_control);
     } else if (strcmp(op, lw_op) == 0) {
-        strncpy(control_signal, lw_control, 9);
+        strcpy(control_signal_e, lw_control);
     } else if (strcmp(op, sw_op) == 0) {
-        strncpy(control_signal, sw_control, 9);
-    } else {
-        strncpy(control_signal, addi_control, 9);
+        strcpy(control_signal_e, sw_control);
+    } else if (strcmp(op, addi_op) == 0){
+        strcpy(control_signal_e, addi_control);
+    } else if (strcmp(op, andi_op) == 0) {
+        strcpy(control_signal_e, andi_control);
+    } else if (strcmp(op, beq_op) == 0) {
+        strcpy(control_signal_e, beq_control);
+    } else if (strcmp(op, bnq_op) == 0) {
+        strcpy(control_signal_e, bnq_control);
     }
 }
