@@ -5,19 +5,15 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include "struct.h"
 
-extern char *control_signal_e;
-extern char *control_signal_m;
-extern int rs_v, rt_v, rd_v, addr_v, funct_v;
-extern int ALUOut, WriteData;
-
-void exe_print() {
+void exe_print(struct EX_MEM* ex_mem) {
     // TODO: handle Rt/Rd register
     printf("\nEX/MEM :\n");
-    printf("ALUOut\t\t%d\n", ALUOut);
-    printf("WriteData\t%d\n", WriteData);
+    printf("ALUOut\t\t%d\n", ex_mem->ALUOut);
+    printf("WriteData\t%d\n", ex_mem->WriteData);
     printf("Rt/Rd\t\n");
-    printf("Control signals\t%s\n", control_signal_m);
+    printf("Control signals\t%s\n", ex_mem->control_signal);
 }
 
 /* funct: */
@@ -27,32 +23,33 @@ const int and_funct = 36;
 const int or_funct = 37;
 const int slt_funct = 42;
 
-void execution() {
+struct EX_MEM* execution(struct ID_EX* id_ex) {
     char ALUOp[2];
     char *control_bits;
-    control_signal_m = (char *)malloc(sizeof(char) * 6);
-    strncpy(control_signal_m, control_signal_e + 4, 5);
-    control_signal_m[5] = '\0';
-    ALUOp[0] = control_signal_e[1];
-    ALUOp[1] = control_signal_e[2];
+    struct EX_MEM *ex_mem = (struct EX_MEM*)malloc(sizeof(struct EX_MEM));
+    ex_mem->control_signal = (char *)malloc(sizeof(char)*6);
+    strncpy(ex_mem->control_signal, id_ex->control_signal + 4, 5);
+    ex_mem->control_signal[5] = '\0';
+    ALUOp[0] = id_ex->control_signal[1];
+    ALUOp[1] = id_ex->control_signal[2];
     if (strcmp(ALUOp, "10") == 0) {
         /* r-type, see func */
-        switch(funct_v) {
+        switch(id_ex->funct) {
             case add_funct:
-                ALUOut = rs_v + rt_v;
+                ex_mem->ALUOut = id_ex->rs + id_ex->rt;
                 break;
             case sub_funct:
-                ALUOut = rs_v - rt_v;
+                ex_mem->ALUOut = id_ex->rs - id_ex->rt;
                 break;
             case and_funct:
-                ALUOut = rs_v & rt_v;
+                ex_mem->ALUOut = id_ex->rs & id_ex->rt;
                 break;
             case or_funct:
-                ALUOut = rs_v | rt_v;
+                ex_mem->ALUOut = id_ex->rs | id_ex->rt;
                 break;
             case slt_funct:
-                if (rs_v < rt_v) ALUOut = 1;
-                else ALUOut = 0;
+                if (id_ex->rs < id_ex->rt) ex_mem->ALUOut = 1;
+                else ex_mem->ALUOut = 0;
                 break;
             default:
                 printf("cannot recognize function value!!!!!!!!!!!!!!!!!!!");
@@ -60,13 +57,18 @@ void execution() {
         }
     } else if (strcmp(ALUOp, "00") == 0) {
         /* lw or sw -> rs + addr*/
-        ALUOut = rs_v + addr_v;
+        ex_mem->ALUOut = id_ex->rs + id_ex->addr;
     } else if (strcmp(ALUOp, "11")) {
         /* andi */
     } else if (strcmp(ALUOp, "01") == 0) {
         /* branch */
         // TODO: check if is rt - rs
-        ALUOut = rt_v - rs_v;
+        ex_mem->ALUOut = id_ex->rt - id_ex->rs;
     }
-    WriteData = rt_v;
+    ex_mem->WriteData = id_ex->rt;
+    ex_mem->rs = id_ex->rs;
+    ex_mem->rt = id_ex->rt;
+    ex_mem->rd = id_ex->rd;
+    exe_print(ex_mem);
+    return ex_mem;
 }

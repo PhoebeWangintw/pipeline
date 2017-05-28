@@ -1,7 +1,6 @@
 #ifndef IN_DECODE_H
 #define IN_DECODE_H
 
-void instruction_decode(char *instr);
-void in_decode_print();
+struct ID_EX* instruction_decode(struct IF_ID* if_id);
 
 #endif

@@ -5,12 +5,12 @@
 #include "in_decode.h"
 #include "exe.h"
 #include "mem.h"
+#include "struct.h"
 
 /* initialize register & its value */
 int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
 char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
-int rs_v, rt_v, rd_v, addr_v, funct_v;
 
 /* control signal */
 // TODO: check the control signal of andi_control.
@@ -21,63 +21,38 @@ char *addi_control = "000100010";
 char *andi_control = "";
 char *beq_control = "001010000";
 char *bnq_control = "001010000";
-char *control_signal_e = "000000000";
-char *control_signal_m = "00000";
-char *control_signal_w = "00";
 
-/* PC */
-int PC, CC;
+int CC;
+int nopCount;
 
 /* buffer: IF/ID, ID/EX, EX/MEM, MEM/WB */
 char bufferArr[4][32] = {"00000000000000000000000000000000"};
-char *nop_instruction = {"00000000000000000000000000000000"};
 
 // TODO: change global variable to local variable using struct.
-/* IF/ID */
-struct IF_ID {
-
-}
-/* ID/EX */
-struct ID_IE {
-
-}
-/* EX/MEM */
-struct EX_MEM {
-
-}
-/* MEM/WB */
-struct MEM_WB {
-
-}
+/* data hazard, check hazard in main.c */
+/*
+	1a. EX/MEM.RegisterRd = ID/EX.RegisterRs
+	1b. EX/MEM.RegisterRd = ID/EX.RegisterRt
+	2a. MEM/WB.RegisterRd = ID/EX.RegisterRs
+	2b. MEM/WB.RegisterRd = ID/EX.RegisterRt
+*/
 
 void printHeader();
 int main(int argc, char *argv[]) {
-	char *buffer;
-    size_t bufsize = 40;
-    size_t characters;
-	buffer = (char *)malloc(bufsize * sizeof(char));
-    if (buffer == NULL) {
-        perror("Unable to allocate buffer");
-        exit(1);
-	}
 	/* read instructions */
-	PC = 0, CC = 0;  // init PC, CC
-	while (getline(&buffer,&bufsize,stdin) != EOF) {
-		instruction_fetch(buffer);
-		printHeader(buffer);
-		instruction_decode(bufferArr[0]);
-		if (getline(&buffer,&bufsize,stdin) != EOF) {
-			printHeader(buffer);
-		} else {
-			printHeader(nop_instruction);
-		}
-		execution();
+	CC = 0;  // init PC, CC
+	nopCount = 0;
+	while (nopCount < 4) {
+		printHeader();
+		struct IF_ID *if_id = instruction_fetch();
+		struct ID_EX *id_ex = instruction_decode(if_id);
+		struct EX_MEM *ex_mem = execution(id_ex);
 	}
 	return 0;
 }
 
 /* lw, sw, add, addi, sub, or, slt */
-void printHeader(char *instr) {
+void printHeader() {
 	int i;
 	CC += 1;
 	printf("CC %d:\n", CC);
@@ -88,8 +63,4 @@ void printHeader(char *instr) {
 	for (i = 0;i < 5; ++i) 
 		printf("%s: %d\n", dataAddr[i], dataMem[i]);
 	printf("\n");
-	in_fetch_print(instr);
-	in_decode_print();
-	exe_print();
-	mem_print();
 }
