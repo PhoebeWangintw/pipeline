@@ -33,9 +33,10 @@ int main(int argc, char *argv[]) {
 	while (noCount < 4) {
 		write_back(mem_wb);
 		mem_wb = mem(ex_mem);
-		ex_mem = execution(id_ex);
-		id_ex = instruction_decode(mem_wb, ex_mem, if_id);
+		ex_mem = execution(if_id, id_ex, mem_wb);
+		id_ex = instruction_decode(if_id);
 		if_id = instruction_fetch();
+		checkHazard(mem_wb, ex_mem, id_ex, if_id);
 		printHeader();
 	}
 	return 0;

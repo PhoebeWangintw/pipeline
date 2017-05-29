@@ -182,7 +182,6 @@ ALUout		4
 Rt/Rd		2
 Control signals	10
 =================================================================
-mem_wb->ALUOut: 7
 CC 5:
 
 Registers:
@@ -218,7 +217,7 @@ Rd		3
 Control signals	110000010
 
 EX/MEM :
-ALUout		12
+ALUout		8
 WriteData	2
 Rt/Rd		5
 Control signals	00100
@@ -246,8 +245,8 @@ $9: 7
 Data memory:
 0x00: 5
 0x04: 9
-0x08: 4
-0x0C: 2
+0x08: 2
+0x0C: 8
 0x10: 7
 
 IF/ID :
@@ -271,7 +270,7 @@ Control signals	00010
 
 MEM/WB :
 ReadData	0
-ALUout		12
+ALUout		8
 Rt/Rd		5
 Control signals	00
 =================================================================
@@ -292,8 +291,8 @@ $9: 7
 Data memory:
 0x00: 5
 0x04: 9
-0x08: 4
-0x0C: 2
+0x08: 2
+0x0C: 8
 0x10: 7
 
 IF/ID :
@@ -338,8 +337,8 @@ $9: 7
 Data memory:
 0x00: 5
 0x04: 9
-0x08: 4
-0x0C: 2
+0x08: 2
+0x0C: 8
 0x10: 7
 
 IF/ID :

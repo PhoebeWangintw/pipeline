@@ -13,6 +13,8 @@
 
 extern int dataMem[];
 extern int registers[];
+extern char *forwardA;
+extern char *forwardB;
 
 void mem_print(struct MEM_WB* mem_wb) {
     printf("\nMEM/WB :\n");
@@ -43,8 +45,9 @@ struct MEM_WB* mem(struct EX_MEM *ex_mem) {
         mem_wb->ReadData = 0;
     
     /* sw -> MemWrite */
-    if (ex_mem->control_signal[2] == '1')
-        dataMem[ex_mem->ALUOut/4] = registers[mem_wb->rt_rd];
-    
+    if (ex_mem->control_signal[2] == '1') {
+        dataMem[ex_mem->ALUOut/4] = ex_mem->WriteData;
+    }
+
     return mem_wb;
 }

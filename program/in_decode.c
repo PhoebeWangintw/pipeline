@@ -53,7 +53,7 @@ void in_decode_print(struct ID_EX* id_ex) {
     printf("Control signals\t%s\n", id_ex->control_signal);
 }
 
-struct ID_EX* instruction_decode(struct MEM_WB* mem_wb, struct EX_MEM *ex_mem, struct IF_ID* if_id) {
+struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     struct ID_EX *id_ex = (struct ID_EX*)malloc(sizeof(struct ID_EX));
     id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
     if (strcmp(if_id->instr, "00000000000000000000000000000000") == 0) {
@@ -105,24 +105,6 @@ struct ID_EX* instruction_decode(struct MEM_WB* mem_wb, struct EX_MEM *ex_mem, s
         strcpy(id_ex->control_signal, beq_control);
     } else if (strcmp(op, bnq_op) == 0) {
         strcpy(id_ex->control_signal, bnq_control);
-    }
-
-    /* check exhazard */
-    int result = exHazard(ex_mem, id_ex);
-    if (result == 1) {
-        id_ex->rs_v = ex_mem->ALUOut;
-    } else if (result == 2) {
-        id_ex->rt_v = ex_mem->ALUOut;
-    }
-    
-    /* check memhazard */
-    result = memHazard(mem_wb, ex_mem, id_ex);
-    if (result == 1) {
-        printf("mem_wb->ALUOut: %d\n", mem_wb->ALUOut);
-        id_ex->rs_v = mem_wb->ALUOut;
-    } else if (result == 2) {
-        printf("mem_wb->ALUOut: %d\n", mem_wb->ALUOut);
-        id_ex->rt_v = mem_wb->ALUOut;
     }
 
     return id_ex;

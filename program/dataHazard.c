@@ -12,6 +12,7 @@
 
 extern char* forwardA;
 extern char* forwardB;
+extern int dataMem[];
 
 void checkHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_ex, struct IF_ID *if_id);
 
@@ -45,17 +46,16 @@ int memHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_ex)
     /* check the dest register (cannot be $0) */
     forwardA = (char *)malloc(sizeof(char) * 3);
     forwardB = (char *)malloc(sizeof(char) * 3);
-    if ((mem_wb->control_signal[0] == '1') && (mem_wb->rt_rd != 0) &&
-        !((ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 &&
-            (ex_mem->rt_rd != id_ex->rs)) &&
+    int condition_1 = (mem_wb->control_signal[0] == '1') && (mem_wb->rt_rd != 0);
+    int condition_2 = !(ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 && (ex_mem->rt_rd != id_ex->rs);
+    int condition_3 = !(ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 && (ex_mem->rt_rd != id_ex->rt);
+    if (condition_1 &&
         (mem_wb->rt_rd == id_ex->rs)) {
         strcpy(forwardA, "01");
         forwardA[2] = '\0';
         return 1;   
     }
-    if ((mem_wb->control_signal[0] == '1') && (mem_wb->rt_rd != 0) &&
-        !((ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 &&
-            (ex_mem->rt_rd != id_ex->rt)) &&
+    if (condition_1 &&
         (mem_wb->rt_rd == id_ex->rt)) {
         strcpy(forwardB, "01");
         forwardB[2] = '\0';

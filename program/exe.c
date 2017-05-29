@@ -26,7 +26,7 @@ const int slt_funct = 42;
 /* control signals */
 /* RegDst ALUOp1 ALUOp2 ALUSrc */
 
-struct EX_MEM* execution(struct ID_EX* id_ex) {
+struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
     /* pass in ex_mem -> checking hazard */
     char ALUOp[3];
     char *control_bits;
