@@ -6,9 +6,9 @@
 #include<stdlib.h>
 #include<string.h>
 #include "struct.h"
+#include "dataHazard.h"
 
 void exe_print(struct EX_MEM* ex_mem) {
-    // TODO: handle Rt/Rd register
     printf("\nEX/MEM :\n");
     printf("ALUout\t\t%d\n", ex_mem->ALUOut);
     printf("WriteData\t%d\n", ex_mem->WriteData);
@@ -27,6 +27,7 @@ const int slt_funct = 42;
 /* RegDst ALUOp1 ALUOp2 ALUSrc */
 
 struct EX_MEM* execution(struct ID_EX* id_ex) {
+    /* pass in ex_mem -> checking hazard */
     char ALUOp[3];
     char *control_bits;
     struct EX_MEM *ex_mem = (struct EX_MEM*)malloc(sizeof(struct EX_MEM));
@@ -36,6 +37,7 @@ struct EX_MEM* execution(struct ID_EX* id_ex) {
     ALUOp[0] = id_ex->control_signal[1];
     ALUOp[1] = id_ex->control_signal[2];
     ALUOp[2] = '\0';
+    
     if (strcmp(ALUOp, "10") == 0) {
         /* r-type, see func */
         switch(id_ex->funct) {

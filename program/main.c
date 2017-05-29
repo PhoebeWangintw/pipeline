@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "struct.h"
+#include "dataHazard.h"
 #include "in_fetch.h"
 #include "in_decode.h"
 #include "exe.h"
 #include "mem.h"
 #include "write_back.h"
-#include "struct.h"
 
 /* initialize register & its value */
 int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
@@ -14,31 +15,26 @@ char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
 
 int CC;
-int nopCount;
+int noCount;
+char* forwardA;
+char* forwardB;
+struct IF_ID *if_id;
+struct ID_EX *id_ex;
+struct EX_MEM *ex_mem;
+struct MEM_WB *mem_wb;
 
-/* buffer: IF/ID, ID/EX, EX/MEM, MEM/WB */
-char bufferArr[4][32] = {"00000000000000000000000000000000"};
-
-// TODO: change global variable to local variable using struct.
-/* data hazard, check hazard in main.c */
-/*
-	1a. EX/MEM.RegisterRd = ID/EX.RegisterRs
-	1b. EX/MEM.RegisterRd = ID/EX.RegisterRt
-	2a. MEM/WB.RegisterRd = ID/EX.RegisterRs
-	2b. MEM/WB.RegisterRd = ID/EX.RegisterRt
-*/
 void printHeader();
 void init();
 int main(int argc, char *argv[]) {
 	/* read instructions */
 	CC = 0;  // init PC, CC
-	nopCount = 0;
+	noCount = 0;
 	init();
-	while (nopCount < 4) {
+	while (noCount < 4) {
 		write_back(mem_wb);
 		mem_wb = mem(ex_mem);
 		ex_mem = execution(id_ex);
-		id_ex = instruction_decode(if_id);
+		id_ex = instruction_decode(mem_wb, ex_mem, if_id);
 		if_id = instruction_fetch();
 		printHeader();
 	}
@@ -66,6 +62,8 @@ void printHeader() {
 void init() {
 	if_id = (struct IF_ID*)malloc(sizeof(struct IF_ID));
 	if_id->PC = 0;
+	if_id->rs = 0;
+	if_id->rt = 0;
 	if_id->instr = (char *)malloc(sizeof(char) * 33);
 	strcpy(if_id->instr,"00000000000000000000000000000000");
 	if_id->instr[32] = '\0';
@@ -80,7 +78,6 @@ void init() {
 	id_ex->control_signal = (char *)malloc(sizeof(char)*10);
 	strcpy(id_ex->control_signal, "000000000");
 	ex_mem = (struct EX_MEM*)malloc(sizeof(struct EX_MEM));
-	ex_mem->rs = 0;
 	ex_mem->rt_rd = 0;
 	ex_mem->ALUOut = 0;
 	ex_mem->WriteData = 0;

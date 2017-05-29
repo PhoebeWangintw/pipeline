@@ -7,10 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "struct.h"
+#include "bin2dec.h"
+#include "dataHazard.h"
 
 extern int registers[];
+extern char* forwardA;
+extern char* forwardB;
+
 /* control signal */
-// TODO: check the control signal of andi_control.
 char *r_control = "110000010";
 char *lw_control = "000101011";
 char *sw_control = "000100100";
@@ -29,14 +33,7 @@ char *bnq_control = "001010000";
 /* op: 6, rs: 5, rt: 5, address: 16 */
 /* I-type rt, addr(rs) */
 
-/*  */
-
-char op[7];
-char rs[6];
-char rt[6];
-char rd[6];
-char funct[7];
-char addr[17];
+char op[7], rs[6], rt[6], rd[6], funct[7], addr[17];
 char *r_op = "000000";
 char *lw_op = "100011";
 char *sw_op = "101011";
@@ -56,18 +53,7 @@ void in_decode_print(struct ID_EX* id_ex) {
     printf("Control signals\t%s\n", id_ex->control_signal);
 }
 
-int bin2dec(char *bin) {
-    int i;
-    int decimal = 0;
-    for (i = 0; i < strlen(bin); ++i) {
-        decimal *= 2;
-        if (bin[i] == '1') 
-            decimal += 1;
-    }
-    return decimal;
-}
-
-struct ID_EX* instruction_decode(struct IF_ID* if_id) {
+struct ID_EX* instruction_decode(struct MEM_WB* mem_wb, struct EX_MEM *ex_mem, struct IF_ID* if_id) {
     struct ID_EX *id_ex = (struct ID_EX*)malloc(sizeof(struct ID_EX));
     id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
     if (strcmp(if_id->instr, "00000000000000000000000000000000") == 0) {
@@ -95,7 +81,7 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     rd[5] = '\0';
     addr[16] = '\0';
     funct[6] = '\0';
-    // TODO: check if rd == $0
+    
     id_ex->rs = bin2dec(rs);
     id_ex->rt = bin2dec(rt);
     id_ex->rd = bin2dec(rd);
@@ -119,6 +105,24 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
         strcpy(id_ex->control_signal, beq_control);
     } else if (strcmp(op, bnq_op) == 0) {
         strcpy(id_ex->control_signal, bnq_control);
+    }
+
+    /* check exhazard */
+    int result = exHazard(ex_mem, id_ex);
+    if (result == 1) {
+        id_ex->rs_v = ex_mem->ALUOut;
+    } else if (result == 2) {
+        id_ex->rt_v = ex_mem->ALUOut;
+    }
+    
+    /* check memhazard */
+    result = memHazard(mem_wb, ex_mem, id_ex);
+    if (result == 1) {
+        printf("mem_wb->ALUOut: %d\n", mem_wb->ALUOut);
+        id_ex->rs_v = mem_wb->ALUOut;
+    } else if (result == 2) {
+        printf("mem_wb->ALUOut: %d\n", mem_wb->ALUOut);
+        id_ex->rt_v = mem_wb->ALUOut;
     }
 
     return id_ex;
