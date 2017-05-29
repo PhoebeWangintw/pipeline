@@ -8,6 +8,8 @@
 #include "struct.h"
 #include "dataHazard.h"
 
+extern char* bubbleOp;
+
 void exe_print(struct EX_MEM* ex_mem) {
     printf("\nEX/MEM :\n");
     printf("ALUout\t\t%d\n", ex_mem->ALUOut);
@@ -26,7 +28,7 @@ const int slt_funct = 42;
 /* control signals */
 /* RegDst ALUOp1 ALUOp2 ALUSrc */
 
-struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
+struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
     /* pass in ex_mem -> checking hazard */
     char ALUOp[3];
     char *control_bits;
@@ -37,7 +39,17 @@ struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB
     ALUOp[0] = id_ex->control_signal[1];
     ALUOp[1] = id_ex->control_signal[2];
     ALUOp[2] = '\0';
-    
+    int condition = strcmp(ex_mem->control_signal, "00000") == 0 && 
+        strcmp(mem_wb->control_signal, "11") == 0;
+    if (condition) {
+        /* TODO: check mem_wb->ALUout */
+        if (mem_wb->rt_rd == id_ex->rs)
+            id_ex->rs_v = mem_wb->ALUOut;
+        else
+            id_ex->rt_v = mem_wb->ALUOut;
+        ALUOp[0] = bubbleOp[0];
+        ALUOp[1] = bubbleOp[1];
+    }
     if (strcmp(ALUOp, "10") == 0) {
         /* r-type, see func */
         switch(id_ex->funct) {
@@ -58,8 +70,7 @@ struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB
                 else ex_mem->ALUOut = 0;
                 break;
             default:
-                printf("id_Ex: %d\n", id_ex->funct);
-                printf("============cannot recognize function value=============");
+                /* cannot recognize the value */
                 break;
         }
         ex_mem->rt_rd = id_ex->rd;
@@ -67,8 +78,9 @@ struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB
         if (strcmp(ALUOp, "00") == 0) {
             /* lw or sw or addi -> rs + addr*/
             ex_mem->ALUOut = id_ex->rs_v + id_ex->addr;
-        } else if (strcmp(ALUOp, "11")) {
+        } else if (strcmp(ALUOp, "11") == 0) {
             /* andi */
+            ex_mem->ALUOut = id_ex->rs_v & id_ex->addr;
         } else if (strcmp(ALUOp, "01") == 0) {
             /* branch */
             // TODO: check if is rt - rs
@@ -76,6 +88,7 @@ struct EX_MEM* execution(struct IF_ID* if_id, struct ID_EX* id_ex, struct MEM_WB
         }
         ex_mem->rt_rd = id_ex->rt;
     }
+    if (condition) ex_mem->rt_rd = id_ex->rt;
     ex_mem->WriteData = id_ex->rt_v;
     
     return ex_mem;

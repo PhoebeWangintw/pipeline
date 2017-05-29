@@ -14,10 +14,13 @@ int registers[] = {0, 9, 8, 7, 1, 2, 3, 4, 5, 6};  /* $0 ~ $9 */
 char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
 
+int PC = 0;
 int CC;
+int lw_detect = 0;
 int noCount;
 char* forwardA;
 char* forwardB;
+char* bubbleOp;
 struct IF_ID *if_id;
 struct ID_EX *id_ex;
 struct EX_MEM *ex_mem;
@@ -33,9 +36,10 @@ int main(int argc, char *argv[]) {
 	while (noCount < 4) {
 		write_back(mem_wb);
 		mem_wb = mem(ex_mem);
-		ex_mem = execution(if_id, id_ex, mem_wb);
+		ex_mem = execution(id_ex, mem_wb);
 		id_ex = instruction_decode(if_id);
-		if_id = instruction_fetch();
+		if_id = instruction_fetch(if_id);
+		lw_detect = lwDetect(id_ex, if_id);
 		checkHazard(mem_wb, ex_mem, id_ex, if_id);
 		printHeader();
 	}

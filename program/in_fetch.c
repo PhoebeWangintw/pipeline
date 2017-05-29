@@ -6,11 +6,10 @@
 #include "struct.h"
 #include "bin2dec.h"
 
-static int PC = 0;
-static int lastPC = 0;
+extern int PC;
 extern int noCount;
+extern int lw_detect;
 char *no_instruction = {"00000000000000000000000000000000"};
-char *last_instruction = {"00000000000000000000000000000000"};
 
 void addPC() {
     PC += 4;
@@ -22,7 +21,7 @@ void in_fetch_print(struct IF_ID *if_id) {
     printf("Instruction\t%s\n\n", if_id->instr);
 }
 
-struct IF_ID* instruction_fetch() {
+struct IF_ID* instruction_fetch(struct IF_ID* old) {
     struct IF_ID *if_id = (struct IF_ID*)malloc(sizeof(struct IF_ID));
     if_id->instr = (char *)malloc(sizeof(char) * 33);
 
@@ -35,13 +34,19 @@ struct IF_ID* instruction_fetch() {
         perror("Unable to allocate buffer");
         exit(1);
 	}
-    if (getline(&buffer,&bufsize,stdin) != EOF){
+    if (lw_detect) {
+        /* do not read next instruction */
+        PC -= 4;
+        strcpy(if_id->instr, old->instr);
+        noCount = 0;
+    } else if (getline(&buffer,&bufsize,stdin) != EOF){
         strncpy(if_id->instr, buffer, 32);
         noCount = 0;
     } else {
         strncpy(if_id->instr, no_instruction, 32);
         noCount += 1;
     }
+
     if_id->instr[32] = '\0';
 
     char rs[6], rt[6];

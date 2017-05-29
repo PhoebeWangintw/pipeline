@@ -13,6 +13,7 @@
 extern char* forwardA;
 extern char* forwardB;
 extern int dataMem[];
+extern int PC;
 
 void checkHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_ex, struct IF_ID *if_id);
 
@@ -81,9 +82,6 @@ int lwDetect(struct ID_EX *id_ex, struct IF_ID *if_id) {
 }
 
 void checkHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_ex, struct IF_ID *if_id) {
-    int lw_detect = lwDetect(id_ex, if_id);
-    int readMem = 0;
-    if (lw_detect) readMem = 1;
     int ex_hazard = exHazard(ex_mem, id_ex);
     switch(ex_hazard) {
         /* forward = "00" */
@@ -106,16 +104,25 @@ void checkHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_
         case 1:
             /* the first ALU operand is forwarded from 
             data memory or an earlier ALU result */
-            id_ex->rs_v = mem_wb->ALUOut;
+            if (mem_wb->control_signal[1] == '1') {
+                /* MemtoReg */
+                id_ex->rs_v = mem_wb->ReadData;
+            } else {
+                id_ex->rs_v = mem_wb->ALUOut;    
+            }
             break;
         case 2:
             /* the second ALU operand is forwarded from 
             data memory or an earlier ALU result */
-            id_ex->rt_v = mem_wb->ALUOut;
+            if (mem_wb->control_signal[1] == '1') {
+                /* MemtoReg */
+                id_ex->rt_v = mem_wb->ReadData;
+            } else {
+                id_ex->rt_v = mem_wb->ALUOut;
+            }
             break;
         default:
             /* no hazard */
             break;
     }
-    
 }
