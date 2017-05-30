@@ -14,7 +14,6 @@ extern int registers[];
 extern char* forwardA;
 extern char* forwardB;
 extern int lw_detect;
-extern char* bubbleOp;
 
 /* control signal */
 char *r_control = "110000010";
@@ -94,8 +93,10 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     id_ex->rs_v = registers[id_ex->rs];
     id_ex->rt_v = registers[id_ex->rt];
 
-    bubbleOp = (char *)malloc(sizeof(char)*3);
-    if (strcmp(op, r_op) == 0) {
+    if (lw_detect) {
+        /* stall, clear control signals */
+        strcpy(id_ex->control_signal, stall);
+    }else if (strcmp(op, r_op) == 0) {
         /* r-type */
         strcpy(id_ex->control_signal, r_control);
     } else if (strcmp(op, lw_op) == 0) {
@@ -111,14 +112,7 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     } else if (strcmp(op, bnq_op) == 0) {
         strcpy(id_ex->control_signal, bnq_control);
     }
-    bubbleOp[0] = id_ex->control_signal[1];
-    bubbleOp[1] = id_ex->control_signal[2];
-    bubbleOp[2] = '\0';
-    if (lw_detect) {
-        /* stall, clear control signals */
-        id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
-        strcpy(id_ex->control_signal, stall);
-    }
+    
 
     return id_ex;
 }

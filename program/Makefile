@@ -14,4 +14,4 @@ test:
 compare:
 	diff -b output.txt ../output/loadResult.txt
 clear:
-		rm *.o exec
+	rm *.o exec output.txt

@@ -8,8 +8,6 @@
 #include "struct.h"
 #include "dataHazard.h"
 
-extern char* bubbleOp;
-
 void exe_print(struct EX_MEM* ex_mem) {
     printf("\nEX/MEM :\n");
     printf("ALUout\t\t%d\n", ex_mem->ALUOut);
@@ -39,16 +37,16 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
     ALUOp[0] = id_ex->control_signal[1];
     ALUOp[1] = id_ex->control_signal[2];
     ALUOp[2] = '\0';
-    int condition = strcmp(ex_mem->control_signal, "00000") == 0 && 
-        strcmp(mem_wb->control_signal, "11") == 0;
-    if (condition) {
-        /* TODO: check mem_wb->ALUout */
+    /* check if bubble */
+    int condition_1 = strcmp(id_ex->control_signal, "000000000") == 0;
+    /* check if the instruction is all 0s (all 32 bits) */
+    int condition_2 = (id_ex->rs == 0) && (id_ex->rt == 0) && (id_ex->rd == 0)
+                        && (id_ex->addr == 0);
+    if (condition_1 && !condition_2) {
         if (mem_wb->rt_rd == id_ex->rs)
             id_ex->rs_v = mem_wb->ALUOut;
         else
             id_ex->rt_v = mem_wb->ALUOut;
-        ALUOp[0] = bubbleOp[0];
-        ALUOp[1] = bubbleOp[1];
     }
     if (strcmp(ALUOp, "10") == 0) {
         /* r-type, see func */
@@ -76,8 +74,14 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
         ex_mem->rt_rd = id_ex->rd;
     } else {
         if (strcmp(ALUOp, "00") == 0) {
+            /* do add */
             /* lw or sw or addi -> rs + addr*/
-            ex_mem->ALUOut = id_ex->rs_v + id_ex->addr;
+            /* control signal[3] = ALUSrc */
+            if (id_ex->control_signal[3] == '1') {
+                ex_mem->ALUOut = id_ex->rs_v + id_ex->addr;
+            } else {
+                ex_mem->ALUOut = id_ex->rs_v + id_ex->rt_v;
+            }
         } else if (strcmp(ALUOp, "11") == 0) {
             /* andi */
             ex_mem->ALUOut = id_ex->rs_v & id_ex->addr;
@@ -88,7 +92,6 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
         }
         ex_mem->rt_rd = id_ex->rt;
     }
-    if (condition) ex_mem->rt_rd = id_ex->rt;
     ex_mem->WriteData = id_ex->rt_v;
     
     return ex_mem;
