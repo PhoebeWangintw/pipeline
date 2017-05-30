@@ -71,7 +71,6 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
                 /* cannot recognize the value */
                 break;
         }
-        ex_mem->rt_rd = id_ex->rd;
     } else {
         if (strcmp(ALUOp, "00") == 0) {
             /* do add */
@@ -90,6 +89,12 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
             // TODO: check if is rt - rs
             ex_mem->ALUOut = id_ex->rt_v - id_ex->rs_v;
         }
+    }
+    if (id_ex->control_signal[0] == '1') {
+        /* RegDst comes from rd */
+        ex_mem->rt_rd = id_ex->rd;
+    } else {
+        /* RegDst comes from rt */
         ex_mem->rt_rd = id_ex->rt;
     }
     ex_mem->WriteData = id_ex->rt_v;
