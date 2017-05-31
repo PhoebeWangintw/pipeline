@@ -5,13 +5,12 @@
 	2a. MEM/WB.RegisterRd = ID/EX.RegisterRs forwardA = "01"
 	2b. MEM/WB.RegisterRd = ID/EX.RegisterRt forwardB = "01"
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "struct.h"
 
-extern char* forwardA;
-extern char* forwardB;
 extern int dataMem[];
 extern int PC;
 
@@ -21,51 +20,35 @@ int exHazard(struct EX_MEM *ex_mem, struct ID_EX *id_ex) {
     /* control signal -> check Regwrite (R-type) */
     /* check the dest register (cannot be $0) */
     /* check the dest register and the next instruction's used registers */
-    forwardA = (char *)malloc(sizeof(char) * 3);
-    forwardB = (char *)malloc(sizeof(char) * 3);
     if ((ex_mem->control_signal[3] == '1') && (ex_mem->rt_rd != 0) && 
         (ex_mem->rt_rd == id_ex->rs)) {
-        strcpy(forwardA, "10");
-        forwardA[2] = '\0';
+        /* forwardA = 10 */
         return 1;
     }
     if ((ex_mem->control_signal[3] == '1') && (ex_mem->rt_rd != 0) &&
         (ex_mem->rt_rd == id_ex->rt)) {
-        strcpy(forwardB, "10");
-        forwardB[2] = '\0';
+        /* forwardB = 10 */
         return 2;
     }
-    strcpy(forwardA, "00");
-    forwardA[2] = '\0';
-    strcpy(forwardB, "00");
-    forwardB[2] = '\0';
     return 0;
 }
 
 int memHazard(struct MEM_WB *mem_wb, struct EX_MEM *ex_mem, struct ID_EX *id_ex) {
     /* control signal -> check RegWrite (R-type) */
     /* check the dest register (cannot be $0) */
-    forwardA = (char *)malloc(sizeof(char) * 3);
-    forwardB = (char *)malloc(sizeof(char) * 3);
     int condition_1 = (mem_wb->control_signal[0] == '1') && (mem_wb->rt_rd != 0);
     int condition_2 = !(ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 && (ex_mem->rt_rd != id_ex->rs);
     int condition_3 = !(ex_mem->control_signal[3] == '1') && ex_mem->rt_rd != 0 && (ex_mem->rt_rd != id_ex->rt);
     if (condition_1 &&
         (mem_wb->rt_rd == id_ex->rs)) {
-        strcpy(forwardA, "01");
-        forwardA[2] = '\0';
+        /* forwardA = 01 */
         return 1;   
     }
     if (condition_1 &&
         (mem_wb->rt_rd == id_ex->rt)) {
-        strcpy(forwardB, "01");
-        forwardB[2] = '\0';
+        /* forwardB = 01 */
         return 2;   
     }
-    strcpy(forwardA, "00");
-    forwardA[2] = '\0';
-    strcpy(forwardB, "00");
-    forwardB[2] = '\0';
     return 0;
 }
 

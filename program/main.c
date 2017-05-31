@@ -21,8 +21,6 @@ int clear_id = 0;
 int CC;
 int lw_detect = 0;
 int noCount;
-char* forwardA;
-char* forwardB;
 struct IF_ID *if_id;
 struct ID_EX *id_ex;
 struct EX_MEM *ex_mem;

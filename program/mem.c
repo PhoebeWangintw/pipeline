@@ -13,8 +13,6 @@
 
 extern int dataMem[];
 extern int registers[];
-extern char *forwardA;
-extern char *forwardB;
 
 void mem_print(struct MEM_WB* mem_wb) {
     printf("\nMEM/WB :\n");
