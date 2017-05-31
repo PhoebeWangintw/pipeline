@@ -15,6 +15,9 @@ char *dataAddr[5] = {"0x00", "0x04", "0x08", "0x0C", "0x10"};
 int dataMem[] = {5, 9, 4, 8, 7};  /* 0x00 ~ 0x10 */
 
 int PC = 0;
+/* setting jump checker */
+int jump = 1;
+int clear_id = 0;
 int CC;
 int lw_detect = 0;
 int noCount;

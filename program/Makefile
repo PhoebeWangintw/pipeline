@@ -1,17 +1,19 @@
 all:
 	gcc -o exec *.c
 check_all:
-	./exec < ../input/General.txt > output.txt
-	diff -b output.txt ../output/genResult.txt
-	./exec < ../input/Datahazard.txt > output.txt
-	diff -b output.txt ../output/dataResult.txt
-	./exec < ../input/Lwhazard.txt > output.txt
-	diff -b output.txt ../output/loadResult.txt
+	./exec < ../input/General.txt > genResult.txt
+	diff -b genResult.txt ../output/genResult.txt
+	./exec < ../input/Datahazard.txt > dataResult.txt
+	diff -b dataResult.txt ../output/dataResult.txt
+	./exec < ../input/Lwhazard.txt > loadResult.txt
+	diff -b loadResult.txt ../output/loadResult.txt
+	./exec < ../input/Branchhazard.txt > branchResult.txt
+	diff -b branchResult.txt ../output/branchResult.txt
 test:
 	gcc -o exec *.c
-	./exec < ../input/Lwhazard.txt > output.txt
+	./exec < ../input/Branchhazard.txt > branchResult.txt
 	# diff -b output.txt ../output/loadResult.txt
 compare:
-	diff -b output.txt ../output/loadResult.txt
+	diff -b branchResult.txt ../output/branchResult.txt
 clear:
-	rm *.o exec output.txt
+	rm *.o exec branchResult.txt genResult.txt dataResult.txt loadResult.txt

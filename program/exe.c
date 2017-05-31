@@ -8,6 +8,10 @@
 #include "struct.h"
 #include "dataHazard.h"
 
+
+extern int jump;
+extern int clear_id;
+
 void exe_print(struct EX_MEM* ex_mem) {
     printf("\nEX/MEM :\n");
     printf("ALUout\t\t%d\n", ex_mem->ALUOut);
@@ -48,6 +52,7 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
         else
             id_ex->rt_v = mem_wb->ALUOut;
     }
+
     if (strcmp(ALUOp, "10") == 0) {
         /* r-type, see func */
         switch(id_ex->funct) {
@@ -85,9 +90,12 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
             /* andi */
             ex_mem->ALUOut = id_ex->rs_v & id_ex->addr;
         } else if (strcmp(ALUOp, "01") == 0) {
-            /* branch */
-            // TODO: check if is rt - rs
-            ex_mem->ALUOut = id_ex->rt_v - id_ex->rs_v;
+            /* branch not equal */
+            ex_mem->ALUOut = id_ex->rs_v - id_ex->rt_v;
+            if (ex_mem->ALUOut != 0) {
+                /* the number of instructions to jump */
+                jump = id_ex->addr + 1;
+            }
         }
     }
     if (id_ex->control_signal[0] == '1') {
@@ -99,5 +107,10 @@ struct EX_MEM* execution(struct ID_EX* id_ex, struct MEM_WB* mem_wb) {
     }
     ex_mem->WriteData = id_ex->rt_v;
     
+    /* if jump, change PC and clear ID_EX instruction */
+    if (jump != 1) {
+        clear_id = 1;
+    }
+
     return ex_mem;
 }

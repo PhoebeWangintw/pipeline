@@ -7,12 +7,14 @@
 #include "bin2dec.h"
 
 extern int PC;
+extern int jump;
 extern int noCount;
 extern int lw_detect;
 char *no_instruction = {"00000000000000000000000000000000"};
 
 void addPC() {
-    PC += 4;
+    PC += (4 * jump);
+    jump = 1;
 }
 
 void in_fetch_print(struct IF_ID *if_id) {
@@ -39,12 +41,25 @@ struct IF_ID* instruction_fetch(struct IF_ID* old) {
         PC -= 4;
         strcpy(if_id->instr, old->instr);
         noCount = 0;
-    } else if (getline(&buffer,&bufsize,stdin) != EOF){
-        strncpy(if_id->instr, buffer, 32);
-        noCount = 0;
     } else {
-        strncpy(if_id->instr, no_instruction, 32);
-        noCount += 1;
+        /* if the branch is going to jump, add jump - 1 */
+        /* already read one instruction in this stage. */
+        int instr_to_jump = jump;
+        if (instr_to_jump != 1)
+            instr_to_jump--;
+        while (instr_to_jump != 0) {
+            if(getline(&buffer,&bufsize,stdin) == EOF) {
+                /* do nothing */
+                strncpy(if_id->instr, no_instruction, 32);
+                noCount += 1;
+                break;
+            }
+            instr_to_jump--;
+        }
+        if (instr_to_jump == 0) {
+            strncpy(if_id->instr, buffer, 32);
+            noCount = 0;
+        }
     }
 
     if_id->instr[32] = '\0';

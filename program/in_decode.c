@@ -14,6 +14,7 @@ extern int registers[];
 extern char* forwardA;
 extern char* forwardB;
 extern int lw_detect;
+extern int clear_id;
 
 /* control signal */
 char *r_control = "110000010";
@@ -40,7 +41,6 @@ char op[7], rs[6], rt[6], rd[6], funct[7], addr[17];
 char *r_op = "000000";
 char *lw_op = "100011";
 char *sw_op = "101011";
-char *beq_op = "000100";
 char *bnq_op = "000101";
 char *addi_op = "001000";
 char *andi_op = "001100";
@@ -59,7 +59,7 @@ void in_decode_print(struct ID_EX* id_ex) {
 struct ID_EX* instruction_decode(struct IF_ID* if_id) {
     struct ID_EX *id_ex = (struct ID_EX*)malloc(sizeof(struct ID_EX));
     id_ex->control_signal = (char *)malloc(sizeof(char)*strlen(r_control));
-    if (strcmp(if_id->instr, "00000000000000000000000000000000") == 0) {
+    if ((strcmp(if_id->instr, "00000000000000000000000000000000") == 0) || clear_id == 1) {
         id_ex->rs = 0;
         id_ex->rt = 0;
         id_ex->rd = 0;
@@ -69,6 +69,7 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
         id_ex->funct = 0;
         strcpy(id_ex->control_signal, "000000000");
         id_ex->control_signal[9] = '\0';
+        clear_id = 0;
         return id_ex;
     }
     // op code
@@ -107,8 +108,6 @@ struct ID_EX* instruction_decode(struct IF_ID* if_id) {
         strcpy(id_ex->control_signal, addi_control);
     } else if (strcmp(op, andi_op) == 0) {
         strcpy(id_ex->control_signal, andi_control);
-    } else if (strcmp(op, beq_op) == 0) {
-        strcpy(id_ex->control_signal, beq_control);
     } else if (strcmp(op, bnq_op) == 0) {
         strcpy(id_ex->control_signal, bnq_control);
     }
